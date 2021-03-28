@@ -55,4 +55,19 @@ public class HomeController {
 
         return "/index";
     }
+
+    @GetMapping("/site/login")
+    public String getLoginPage(){
+
+        return "/site/login";
+    }
+
+    @GetMapping("/site/register")
+    public String getRegisterPage(){
+
+        return "/site/register";
+    }
+
+
+
 }
