@@ -7,6 +7,7 @@ import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.CommentService;
 import com.nowcoder.community.service.DiscussPostService;
+import com.nowcoder.community.service.LikeService;
 import com.nowcoder.community.service.UserService;
 import com.nowcoder.community.utils.CommunityUtil;
 import com.nowcoder.community.utils.HostHolder;
@@ -23,6 +24,9 @@ import java.util.*;
 @Controller
 @RequestMapping("/discuss")
 public class DiscussPostController {
+
+    @Autowired
+    LikeService likeService;
 
     @Autowired
     DiscussPostService discussPostService;
@@ -69,6 +73,15 @@ public class DiscussPostController {
         //作者
         User user = userService.selectById(discussPost.getUserId());
         model.addAttribute("user",user);
+
+
+        // 点赞数量
+        long likeCount = likeService.findEntityLikeCount(1, discussPostId);
+        model.addAttribute("likeCount", likeCount);
+        // 点赞状态
+        int likeStatus = hostHolder.getUser() == null ? 0 :
+                likeService.findEntityLikeStatus(hostHolder.getUser().getId(), 1, discussPostId);
+        model.addAttribute("likeStatus", likeStatus);
         //分页信息
         page.setLimit(5);
         page.setPath("/discuss/detail/"+discussPost.getId());
@@ -89,7 +102,13 @@ public class DiscussPostController {
                 commentVo.put("comment", comment);
                 // 作者
                 commentVo.put("user", userService.selectById(comment.getUserId()));
-
+                // 点赞数量
+                likeCount = likeService.findEntityLikeCount(2, comment.getId());
+                commentVo.put("likeCount", likeCount);
+                // 点赞状态
+                likeStatus = hostHolder.getUser() == null ? 0 :
+                        likeService.findEntityLikeStatus(hostHolder.getUser().getId(), 2, comment.getId());
+                commentVo.put("likeStatus", likeStatus);
 
                 // 回复列表
                 List<Comment> replyList = commentService.getComments(
@@ -108,6 +127,14 @@ public class DiscussPostController {
                         // 回复目标
                         User target = reply.getTargetId() == 0 ? null : userService.selectById(reply.getTargetId());
                         replyVo.put("target", target);
+                        // 点赞数量
+                        likeCount = likeService.findEntityLikeCount(2, reply.getId());
+                        replyVo.put("likeCount", likeCount);
+                        // 点赞状态
+                        likeStatus = hostHolder.getUser() == null ? 0 :
+                                likeService.findEntityLikeStatus(hostHolder.getUser().getId(), 2, reply.getId());
+                        replyVo.put("likeStatus", likeStatus);
+
 
                         replyVoList.add(replyVo);
                     }
